@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react'; 
 import { launchImageLibrary } from 'react-native-image-picker'; 
+import RNFS from 'react-native-fs';
 import FaceSDK, { 
   Enum, 
   FaceCaptureResponse, 
@@ -34,6 +35,7 @@ function App() {
   const [img1, setImg1] = useState({uri: require('./images/portrait.png')})
   const [img2, setImg2] = useState({uri: require('./images/portrait.png')})
   const [similarity, setSimilarity] = useState({ similarity: "nil" }) 
+  console.log(img1)
 
   //Capture the images
   const pickImage = (first) => {
