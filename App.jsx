@@ -6,8 +6,7 @@
  */
 
 import React, { useState } from 'react'; 
-import { launchImageLibrary } from 'react-native-image-picker'; 
-import RNFS from 'react-native-fs';
+import { launchImageLibrary } from 'react-native-image-picker';  
 import FaceSDK, { 
   Enum, 
   FaceCaptureResponse, 
@@ -32,11 +31,36 @@ function App() {
   const [imge1, setImge1] = useState(new MatchFacesImage())
   const [imge2, setImge2] = useState(new MatchFacesImage())
 
+  const [arrayImage, setArrayImage] = useState([])
+
   const [img1, setImg1] = useState({uri: require('./images/portrait.png')})
   const [img2, setImg2] = useState({uri: require('./images/portrait.png')})
   const [similarity, setSimilarity] = useState({ similarity: "nil" }) 
-  console.log(img1)
+  console.log('==========image1',imge1)
+  console.log('=====arrayImage', arrayImage)
+  
 
+  // Convertendo array de imagens em blob
+  async function getBlobsFromImages(arrayImage) {
+    const blobImages = await Promise.all(arrayImage.map(async (image) => {
+      console.log('======comeco========',image, '=======final=====')
+      const response = await fetch(image)
+      const blob = await response.blob()
+      return blob
+    }))
+    return blobImages
+  }
+  
+  getBlobsFromImages(arrayImage)
+    .then((blobImages) => {
+      console.log('=====blobImages',blobImages);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+    console.log('==========length', arrayImage.length)
+    
   //Capture the images
   const pickImage = (first) => {
     Alert.alert("Select option", "", [
@@ -62,6 +86,7 @@ function App() {
       imge1.bitmap = base64
       imge1.imageType = type
       setImg1({uri: { uri: "data:image/png;base64," + base64 }})
+      setArrayImage([...arrayImage, "data:image/png;base64," + base64 ])
     } else {
       imge2.bitmap = base64
       imge2.imageType = type
