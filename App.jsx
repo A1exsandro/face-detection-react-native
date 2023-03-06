@@ -38,30 +38,28 @@ function App() {
   const [similarity, setSimilarity] = useState({ similarity: "nil" }) 
   console.log('==========image1',imge1)
   console.log('=====arrayImage', arrayImage)
-  
+  console.log('==========length', arrayImage.length)
 
   // Convertendo array de imagens em blob
-  async function getBlobsFromImages(arrayImage) {
-    const blobImages = await Promise.all(arrayImage.map(async (image) => {
-      console.log('======comeco========',image, '=======final=====')
-      const response = await fetch(image)
-      const blob = await response.blob()
-      return blob
-    }))
-    return blobImages
-  }
+  // async function getBlobsFromImages(arrayImage) {
+  //   const blobImages = await Promise.all(arrayImage.map(async (image) => {
+  //     console.log('======comeco========',image, '=======final=====')
+  //     const response = await fetch(image)
+  //     const blob = await response.blob()
+  //     return blob
+  //   }))
+  //   return blobImages
+  // }
   
-  getBlobsFromImages(arrayImage)
-    .then((blobImages) => {
-      console.log('=====blobImages',blobImages);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+  // getBlobsFromImages(arrayImage)
+  //   .then((blobImages) => {
+  //     console.log('=====blobImages',blobImages);
+  //   })
+  //   .catch((error) => {
+  //     console.error(error);
+  //   });
 
-    console.log('==========length', arrayImage.length)
-    
-  //Capture the images
+  // Capture the images
   const pickImage = (first) => {
     Alert.alert("Select option", "", [
       {
@@ -86,7 +84,7 @@ function App() {
       imge1.bitmap = base64
       imge1.imageType = type
       setImg1({uri: { uri: "data:image/png;base64," + base64 }})
-      setArrayImage([...arrayImage, "data:image/png;base64," + base64 ])
+      setArrayImage([...arrayImage, imge1 ])
     } else {
       imge2.bitmap = base64
       imge2.imageType = type
@@ -101,18 +99,25 @@ function App() {
 
     setSimilarity({ similarity: "Processing..." })
 
-    const request = new MatchFacesRequest()
-    request.images = [imge1, imge2] 
-
-    FaceSDK.matchFaces(JSON.stringify(request), matchFacesResponse => {
-      const response = MatchFacesResponse.fromJson(JSON.parse(matchFacesResponse))
+    arrayImage.map((m1) => {
+      console.log('=m1=', m1)
+      console.log('=m2=', imge2)
+      console.log('here========')
+      let request = new MatchFacesRequest()
+      request.images = [m1, imge2] 
   
-      FaceSDK.matchFacesSimilarityThresholdSplit(JSON.stringify(response.results), 0.75, str => {
-        const split = MatchFacesSimilarityThresholdSplit.fromJson(JSON.parse(str))
-        setSimilarity({ similarity: split.matchedFaces.length > 0 ? ((split.matchedFaces[0].similarity * 100).toFixed(2) + "%") : "error" })
-
+      FaceSDK.matchFaces(JSON.stringify(request), matchFacesResponse => {
+        const response =  MatchFacesResponse.fromJson(JSON.parse(matchFacesResponse))
+    
+        FaceSDK.matchFacesSimilarityThresholdSplit(JSON.stringify(response.results), 0.75, str => {
+          const split = MatchFacesSimilarityThresholdSplit.fromJson(JSON.parse(str))
+          setSimilarity({ similarity: split.matchedFaces.length > 0 ? ((split.matchedFaces[0].similarity * 100).toFixed(2) + "%") : "error" })
+  
+        }, e => { setSimilarity({ similarity: e }) })
       }, e => { setSimilarity({ similarity: e }) })
-    }, e => { setSimilarity({ similarity: e }) })
+  })
+
+   
   }
 
   // Clear Result
